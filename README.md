@@ -124,3 +124,119 @@
 [^29]: 拼接（concatenation）會將兩個特徵圖在特定維度上連接起來，擴展特徵圖的通道數。這樣可以保留並整合來自不同來源的信息，使得後續的層能夠同時利用所有拼接的特徵。
 [^30]: 元啟發方法是一類用於解決優化問題的策略，通常用於尋找、生成或選擇近似解，特別是在解空間很大或非常複雜時。這些方法不保證找到全局最優解，但能在合理的時間內找到足夠好的解。元啟發方法的特點包括：(1) 適應性：能夠根據問題的特性調整搜索策略、(2) 多樣性：探索解空間的不同區域以避免陷入局部最優、(3) 記憶性：記錄過去的搜索經驗以引導未來的搜索方向。
 [^31]: F1-score 是一種常用的衡量分類模型性能的指標，特別適用於不平衡數據集。它綜合了精確率（Precision）和召回率（Recall）兩個指標，是它們的調和平均數。F1-score 在 0 和 1 之間，越接近 1 表示模型的性能越好。
+
+# <a name="_i8q1dsth6sv3"></a><a name="_1me4ksbno3i9"></a><a name="_cyfcuiej3eie"></a><a name="_95lmf0whkv85"></a><a name="_kbzuymudstqh"></a><a name="_cd8f6gns3d3q"></a><a name="_lcekkj44vevp"></a><a name="_wxqnq9tqj2p"></a><a name="_hbxlcs98k2on"></a><a name="_uxirl4m4ygxl"></a><a name="_re5ykfnjiw6u"></a><a name="_46l7lmc4o38t"></a><a name="_t2nyognk9ocf"></a><a name="_yuni111wzpkw"></a>知識補充
+## <a name="_2rvfc15g4gxx"></a>(1) <a name="q7uokxsorj7p"></a>CNN模型
+卷積神經網路（CNN, Convolutional Neural Network）是一種專門用於處理影像的深度學習模型。CNN 模型在影像識別、物件偵測和圖像分割等任務中表現出色。
+
+CNN 模型的主要組成部分包含卷積層、線性整流層、池化層、全連接層和輸出層。
+
+[卷積神經網路- 維基百科，自由的百科全書](https://zh.wikipedia.org/zh-tw/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C)
+
+[深度學習：CNN原理](https://cinnamonaitaiwan.medium.com/%E6%B7%B1%E5%BA%A6%E5%AD%B8%E7%BF%92-cnn%E5%8E%9F%E7%90%86-keras%E5%AF%A6%E7%8F%BE-432fd9ea4935)
+### <a name="_dg2b46xvffpx"></a>**卷積層（Convolutional Layer）**
+卷積層的目的是提取圖像中的局部特徵，如邊緣、角點等。
+
+在卷積層中，每一組神經元會負責偵測一項特徵，他們會有一個特徵接收域（Receptive Field），是該神經元可以在輸入圖像中所觀察到的區域。可以把 Receptive Field 看做是一個小的窗口，神經元透過這窗口找尋圖像中是否存在特定特徵，最後卷積層可以產生一組卷積運算的結果，稱為特徵圖（feature map）。
+
+每一層卷積層使用多個卷積核（filter 或 kernel）對輸入圖像進行卷積操作。這些卷積核通常為3x3或5x5，它裡面的值是隨機的或經過訓練學到的。在一層卷積操作中，kernel 的大小決定了該層神經元的 Receptive Field。但是當卷積層當有多層疊加時，較深層的神經元的 Receptive Field 會增大，例如，如果第一層使用 3x3 kernel，第二層也使用 3x3 kernel，那麼第二層神經元的 Receptive Field 會變成 5x5。
+
+- ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/17.png)
+### <a name="_7z8scvt2eusl"></a>**線性整流層（Rectified Linear Units layer, ReLU layer）**
+在卷積運算之後，通常會應用非線性激勵函式（Activation function），如 ReLU函數，這樣模型可以貼近更複雜的函數圖形。其他的一些函式也可以用於增強網路的非線性特性，如雙曲函數 tanh 和 Sigmoid 函數。
+
+- [線性整流函式- 維基百科，自由的百科全書](https://zh.wikipedia.org/wiki/%E7%BA%BF%E6%80%A7%E6%95%B4%E6%B5%81%E5%87%BD%E6%95%B0)：把輸入的任何負數都會變成0，正數保持不變。
+- [雙曲函數- 維基百科，自由的百科全書](https://zh.wikipedia.org/wiki/%E5%8F%8C%E6%9B%B2%E5%87%BD%E6%95%B0)：把輸入值壓縮到-1到1之間。
+- [S型函數- 維基百科，自由的百科全書](https://zh.wikipedia.org/wiki/S%E5%9E%8B%E5%87%BD%E6%95%B0)：把輸入值壓縮到0到1之間，用於讓輸出值可以表示成機率。
+### <a name="_t25pls8akleh"></a>**池化層（Pooling Layer）**
+用於減少特徵圖的尺寸和計算量，同時保留重要特徵。經過池化後的新的特徵圖，每一個值代表了特徵的重要性權重，權重值越大，說明該特徵越重要。通過池化層可以讓 CNN 對圖像的平移、旋轉和縮放具有一定的適應性。
+
+常見的類型有：
+
+- 最大池化（Max Pool）：將整個特徵圖的最大值提取出來，形成一個新的特徵向量，這個動作可以將取得圖像的最顯著特徵。
+- 全局平均池化（Global Average Pooling，GAP）：將整個特徵圖的平均值計算出來，形成一個單一的特徵向量，這個動作可以將取得圖像的整體特徵，更適合用於分類任務。
+
+- ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/18.png)
+### <a name="_ank0zvjksa5y"></a>**全連接層（Fully Connected Layer / Dense Layer，FC）**
+在通過多層卷積和池化後，特徵圖會拉直成一維的向量，然後輸入到全連接層，全連接層中的神經元與前一層中的所有啟用都有連結，全連接層的功能是將前面卷積和池化層提取的特徵整合起來進行綜合地考量。在一些深度學習框架如 Keras 中稱全連接層為 Dense Layer。
+### <a name="_ygidxcx6cle0"></a>**輸出層（Output Layer）**
+輸出層通常使用Softmax函數來輸出每個類別的機率分佈，可以根據機率最高的類別對物件進行多類別分類。
+
+- [Softmax函式- 維基百科，自由的百科全書](https://zh.wikipedia.org/wiki/Softmax%E5%87%BD%E6%95%B0)：將輸入正規化，輸出成機率分布。
+
+
+
+
+
+## <a name="v47oonjtbit1"></a><a name="_royby2r8llaf"></a>(2) 注意力機制（Attention-based Mechanisms）
+注意力機制最早在自然語言處理（NLP）中引入，用來提高機器翻譯的效果。其主要思想是讓模型在處理某個輸入（如一句話或一張圖像）時，能夠動態地「注意」到其中的關鍵部分，從而提高模型的性能。
+
+[注意力機制 (Attention Mechanism) 的理解與實作 | Kaggle](https://www.kaggle.com/code/lianghsunhuang/attention-mechanism)
+### <a name="_plqlwquqmf5z"></a>**關鍵部分的權重分配**
+- 注意力機制會根據輸入的不同部分的相關性來分配權重，從而讓模型更加專注於重要的部分，而忽略不重要的部分。
+- 注意力權重通常涉及三個主要成分：
+1. 查詢（Query）：待處理的當前輸入部分。
+1. 鍵（Key）：所有輸入部分的表示，用於計算與查詢的相似度。
+1. 值（Value）：與鍵對應的值，表示輸入部分的實際內容。
+
+- 將查詢向量與所有鍵向量進行相似度計算，通常是通過點積（dot product）或其他方式計算相似度，得到注意力權重，這些權重代表了每個輸入部分的重要性。
+
+### <a name="_9066bgarhdxn"></a>**注意力機制與 CNN 的結合**
+- 在圖像處理中，注意力機制可以插入到 CNN 的不同位置，幫助 CNN 更好地提取和強調關鍵特徵。
+- 通道注意力（Channel Attention）：強調特徵圖中某些通道的重要性。
+- 空間注意力（Spatial Attention）：強調圖像中某些空間位置的重要性。
+
+## <a name="w6nl7nldoogd"></a><a name="_mx5wz03en8fg"></a>(3) 訓練深度模型
+深度學習模型通常由許多層組成，每個層都有自己的功能和任務。分解模型的各個部分可以幫助我們更好地理解模型的組成和功能，並且也有助於優化和調試模型。
+
+在深度學習中，通常將模型分為三個部分：backbone、neck 和head。
+### <a name="_btvf1qcdzkve"></a>**主幹網路（Backbone）**
+主幹部分主要用於特徵提取，是模型的基礎部分，這部分通常由一些已經預訓練過的卷積神經網路組成，比如 ResNet50、VGG16、MobileNet、Inception 等。骨幹的主要功能是從輸入圖像中提取豐富的特徵圖（feature maps），以便後續的處理和分析。
+### <a name="_oq1v7m4y7b5f"></a>**頭部（Head）**
+Head 是模型的最後一層，用於進行最終的任務，如分類和定位。 Head 透過輸入經過 Neck 處理過的特徵，產生最終的輸出。 Head 的結構根據任務的不同而不同，例如對於影像分類任務，可以使用 softmax 分類器；對於目標偵測任務，可以使用邊界框回歸器和分類器等。YOLO（You Only Look Once）的頭部結構用於物件檢測，U-Net的頭部結構用於圖像分割。
+### <a name="_80durppoeh3c"></a>**頸部（Neck）**
+Neck 是連接backbone 和head 的中間層。 Neck 的主要作用是用於進一步處理特徵圖，對來自主幹的特徵進行降維或調整，以便更好地適應任務要求。 Neck 可以採用卷積層、池化層或全連接層等。FPN（Feature Pyramid Network）用於多尺度特徵融合。
+### <a name="_4iiirohah90j"></a>**微調（fine-tuning）**
+微調一般用來調整神經網路最後的s oftmax 分類器的分類數。例如原網路可以分類出2種圖像，需要增加1個新的分類從而使網路可以分類出3種圖像。
+
+微調（fine-tuning）可以留用之前訓練的大多數參數，從而達到快速訓練收斂的效果。例如保留各個卷積層，只重構卷積層後的全連接層與 softmax 層即可。
+
+## <a name="_79bxkqlw2p26"></a>(4) InceptionV3
+[\[1512.00567\] Rethinking the Inception Architecture for Computer Vision](https://arxiv.org/abs/1512.00567)
+
+[Inception 系列 — InceptionV2, InceptionV3 | by 李謦伊 | 謦伊的閱讀筆記| Medium](https://medium.com/ching-i/inception-%E7%B3%BB%E5%88%97-inceptionv2-inceptionv3-93cd42054d23)
+
+Inception V3 抽象結構圖：
+看起來應該是先五層卷積+兩層池化 -> 
+接著三個 figure 6 的 Inception -> 
+一個 figure 5 的 Inception -> 
+四個 figure 6 的 Inception -> 
+一個 figure 5 的 Inception -> 
+兩個 figure 7 的 Inception -> 
+最後收尾
+
+- ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/19.png)
+
+InceptionV3架構有三個 Inception module，分別採用不同的結構 (figure5, 6, 7)
+
+- ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/20.png)
+
+- 程式碼模型架構
+
+- ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/21.png)
+## <a name="_5buoath577xv"></a>(5) 微分進化演算法（Differential Evolution）
+[差分進化演算法- 維基百科，自由的百科全書](https://zh.wikipedia.org/zh-tw/%E5%B7%AE%E5%88%86%E8%BF%9B%E5%8C%96%E7%AE%97%E6%B3%95)
+
+這種方法模仿生物演化過程，透過遺傳算法中的突變、交叉和選擇操作來優化模型結構。
+
+微分進化演算法是一種優化演算法，屬於進化演算法（Evolutionary Algorithm）的一種。它通過模仿自然選擇的過程來解決多變數和多目標的優化問題。
+### <a name="_i06qck6ampfn"></a>**DE 的基本步驟**
+1. **初始化：**
+   隨機生成一組個體，每個個體代表一組可能的解，這些候選解組成初始的種群（Population）。隨機初始化確保了種群的多樣性，從不同的起點開始搜索，以增加找到全局最優解的可能性。
+1. **突變（Mutation）：**
+   對於每個個體 x\_i，從解集中隨機選擇三個其他個體，利用它們的差異生成一個突變向量。例如，給定三個個體 x\_1, x\_2 和 x\_3，突變向量可表示為 v\_i = x\_1 + F\*(x\_2 - x\_3) ，其中 F 是超參數稱為微分因子（Mutation factor），通常在 0 到 1 之間。變異的過程增加了解的多樣性，有助於跳出局部最優解。
+1. **交叉（Crossover）：**
+   將突變向量與當前個體進行組合，生成一個試驗個體。這一步驟的目的是組合不同個體的特徵，從而可能生成更優的解。
+1. **選擇（Selection）：**
+   通過比較試驗個體和原始個體的適應度，選擇較好的個體進入下一代。
+
