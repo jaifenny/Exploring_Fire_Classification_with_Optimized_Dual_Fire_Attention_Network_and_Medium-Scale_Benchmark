@@ -1,0 +1,2 @@
+# Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark
+提出 (1) 針對火災檢測的優化雙重火災注意力網路（DFAN）及 (2) 相關的中等規模火災分類基準
