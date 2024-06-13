@@ -91,7 +91,186 @@
 許多研究利用[注意力機制（詳見文件最後的補充）](#v47oonjtbit1)與 CNN 架構結合，以提高模型性能。這些機制通過在分類前選擇最優特徵，顯示了有希望的結果，可以有效定位在火災場景中的火焰位置。
 這些方法在火災場景定位中的應用有效，但僅使用通道注意力（CA）模塊對火災場景定位的細節描述不夠充分。
 
+-----
+# <a name="_3x7jbfwe74ue"></a>III. 方法學
+由於前述的輕量深度學習模型使用淺層的卷積神經網路，其特徵接受域（Receptive Field）較小，進行特徵提取時空間細節不足，並且難以區分火和類似火的移動物體。
 
+本文提出了一個新的深度學習模型，稱為雙重火災注意力網路（DFAN），利用通道注意力（CA）和改良版空間注意力（SA）機制，以獲得更精細的空間細節和用於火災場景分類的資訊通道，來提高火災檢測的準確性。
+- ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/2.png)
+## <a name="_fxi5gqjr88dv"></a>A. 深度特徵提取（Deep Feature Extraction）
+### <a name="_xuy149lrur70"></a>**模型主幹：InceptionV3  模型**
+要開發一個基於視覺、針對火災偵測的 CNN ，現在的主流做法使用預先訓練的模型作為[主幹特徵提取器（詳見文件最後的補充）](#w6nl7nldoogd)，然後在目標資料集上微調深度模型，以進行火災場景分類和定位。
+
+論文從數種背景特徵提取模型挑選，包括 Xception、MobileNet、ResNet50、NASNetMobile 和 InceptionV3，並最後選擇了 [InceptionV3](#_79bxkqlw2p26) 作為最佳的選擇。
+
+多尺度處理<sup>[^24]</sup>是 Inception 模組的特點，它可以在多個任務中提供卓越的結果。
+
+- **Inception 模組**
+  在 InceptionV3 中，有三個基本的 Inception 模組：Inception（A）、（B）和（C）模組。在每個Inception模組中，都有多個並行的捲積層和池化層，如圖4所示。
+  - **Previous Layer：**
+    這是Inception模塊的輸入，通常是來自前一層的特徵圖。
+  - **1x1 Convolutions：**
+    在圖中有多個1x1卷積層。這些1x1卷積層的作用是進行維度減少<sup>[^25]</sup>和非線性映射，從而減少計算量和參數數量，同時保留重要特徵。
+  - **3x3 Convolutions 和 5x5 Convolutions：**
+    中間部分展示了多種尺寸的卷積核（3x3和5x5）。這些卷積核用來捕捉圖像中不同尺度的特徵，進一步提取豐富的局部特徵。
+  - **Max Pooling：**
+    右側有一個3x3最大池化層。最大池化層用來減少特徵圖的尺寸，並保持最重要的特徵。這有助於降低計算需求並增加模型的平移不變性。
+  - **Filter ConCat：**
+    最後一個步驟是將所有不同路徑（1x1卷積、3x3卷積、5x5卷積和最大池化）的輸出在深度方向上進行拼接（Concatenation）。這樣可以保留每個路徑提取的特徵，並形成一個綜合的特徵圖。
+   - ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/3.png)
+
+### <a name="_u950nmlrpog7"></a>**深度特徵提取的運作**
+- ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/4.png)
+
+前面的幾層和主幹特徵提取模組的詳細描述：
+
+- **Input Layer（輸入層）：**
+  橘色矩形代表輸入層，接受原始圖像數據。
+- **Conv Layer（卷積層）：**
+  紫色矩形代表卷積層，這些層負責對輸入圖像進行初步特徵提取。每個卷積層使用若干個卷積核來提取特徵。
+- **Max Pool（最大池化）：**
+  紅色矩形代表最大池化層，這些層用來減少特徵圖的尺寸，保留重要特徵，同時降低計算量。
+- **GAP Layer（全局平均池化層）**
+  灰色矩形代表全局平均池化層，用來將特徵圖進一步縮小到一個固定大小的特徵向量。Concat Layer（拼接層）：綠色矩形代表拼接層，這些層將不同卷積核和池化操作的結果在深度方向上拼接，形成綜合特徵圖。
+- **主幹特徵提取模塊：**
+  InceptionV3的預設輸入為大小 299 × 299 ，具有三個通道（RGB）的影像。輸入影像最初使用五個卷積層進行處理，其中每個卷積層包含幾個大小為 3 × 3 kernel。
+  ` `DFAN 最初的卷積結果為 μ(χ)，經過三個 Inception 模組，移除 InceptionV3 的最終全連接層，保留一個 8×8 大小、2048 個通道的特徵向量 α （特徵地圖）。
+  這個 α 包含了物件的結構、邊緣細節、顏色、形狀等資訊，但這些資訊還不足以精確辨識火源，因此還需要偷過雙重火災注意力模組進一步提取通道和空間訊息。
+- ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/5.png)
+
+## <a name="_dhcn0wibrrwx"></a>B. 雙重火災注意力（Dual Fire Attention）
+### <a name="_kuktbyg2za2u"></a>**現有方法的局限**
+CNN 結合注意力機制在視訊資料上表現良好，但是在圖片資料上則表現不太行，因為圖片資料的多樣性比較大，且只單獨使用通道注意力或或空間注意力模組。
+
+- ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/6.png)
+### <a name="_f0e9mdib8m2f"></a>**通道注意力（Channel Attention，CA）**
+- ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/7.png)
+
+- **目標**
+  這部分則是關注圖像中的哪些資訊是火焰的特徵（如顏色、形狀）。
+
+- **CA 的步驟：**
+  - **全局平均池化（Average Pooling）和最大池化（Max Pooling）**：
+    對特徵圖 α 進行全局平均池化和最大池化。最大池化操作專注於對象最獨特的特徵，如火焰的邊緣或高亮度區域。而平均池化提供了整個圖像的基本特徵，如火焰的整體形狀和顏色分佈。
+  - **全連接層（FC）**：
+    利用全連接層來壓縮和擴展通道特徵，進行 ReLU 激活，並將兩種池化策略的結果 M\_max 和 M\_avg 進行相加<sup>[^26]</sup>，得到最終的通道注意力映射（Mc(α)）。
+  - **將權重應用在原始輸入特徵**：
+    將通道注意力特徵圖與原始特徵地圖相乘<sup>[^27]</sup>，也就是將學習到的重要性權重應用到原始特徵地圖上，生成通道注意力特徵（Fc），準備輸入到下一個模組。這個步驟可以讓模型更多關注在火焰的特徵，減少關注在背景或雜訊等不重要的資訊。
+### <a name="_go2mi9pied12"></a>**改良版<sup>[^28]</sup>空間注意力（Modified Spatial Attention，Modified SA）：**
+- ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/8.png)
+
+- **目標**：
+  這部分則是關注圖像中的哪些具體區域最可能是火焰。
+
+- **SA 的步驟：**
+  - **全局平均池化（Average Pooling）和最大池化（Max Pooling）**：
+    這一步驟與 CA 相同，對通道注意力的結果做平均池化和最大池化，以突顯出特徵資訊豐富的區域，生成兩種二維特徵圖（α\_S\_avg 和 α\_S\_max）。
+  - **特徵融合與卷積運算**：
+    將兩種池化後的特徵圖進行加權融合，再通過三層卷積操作，包括1×1卷積、3×3卷積和1×1卷積，每層包含64個過濾器，在每一卷積層之後應用 ReLU 激活函數，以增加非線性。得到 M\_s\_F\_c。
+  - **全局平均池化和特徵融合**：
+    對卷積結果進行全局平均池化，並將其與通道注意力特徵圖進行拼接<sup>[^29]</sup>，得到空間注意力特徵圖（F\_s）。
+  - **全連接層特徵合併和正規化**：
+    對空間注意力特徵圖進行批次正規化（Batch Normalization），以穩定訓練過程並提高模型的通用能力。接著再與與原始特徵地圖拼接，最終生成改良的空間注意力特徵圖（Fcs）。
+  - **最終特徵融合**：
+    將融合特徵圖傳遞給全連接層（dense layer，FC 的另一種稱呼），並最終通過Softmax 層進行分類。
+
+## <a name="_3zfakq7mwmd9"></a>C. DFAN 壓縮模塊（DFAN Compression Module）
+### <a name="_86f8ahwirfsz"></a>**壓縮模型的必要性**
+因為火災具有快速擴散和破壞性的特點，因此火災檢測系統需要能夠即時進行檢測，也就是說模型需要能在邊緣設備上運行，以滿足低延遲、快速推理時間、即時決策等需求。
+
+然而，邊緣設備通常計算能力和儲存空間有限，這限制了能在這些設備上部署的模型的大小和複雜性。
+### <a name="_9my6t3evrn2o"></a>**壓縮策略**
+- 使用基於[微分進化演算法（Differential Evolution, DE）](#_5buoath577xv)的元啟發方法<sup>[^30]</sup>來進行模型壓縮，以減少學習參數的數量並提高模型效率。
+- **壓縮過程：**
+- **初始化**：
+  從一組隨機生成的初始向量群體（Polulation pool of vectors）開始，每個向量代表一個可能的解集。每個向量的大小等於隱藏層中的神經元數量，元素值為0或1。0表示對應的神經元將被丟棄，1表示保留該神經元。
+- **突變階段（Mutation）：**
+  選擇三個隨機向量（v1, v2, v3）作為基礎，計算捐贈者向量（Donor vector）。
+  F  是突變因子（mutation factor）在實驗設置為 0.5，由於結果值不在集合（0,1）中，因此將值重新縮放為 0 和 1（小於 0.5 的值設為 0，大於或等於 0.5 的值設為 1）
+ - ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/9.png)
+- **重組階段（Recombination）：**
+  在重組階段中，為每個向量元素生成一個隨機數，重組因子（recombination factor）在實驗設置為 0.7，若小於 0.7 則將目標向量指派給結果向量（resultant vector），否則將捐贈向量指派給結果向量。
+- ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/10.png)
+- **選擇階段（Selection）：**
+  在每次迭代中，根據適應度準則選擇更好的向量集。
+  適應度函數（fitness function） Z 會同時考慮 F1 得分（F1-score）<sup>[^31]</sup>和壓縮率（compression ratio）。
+  - 適應度函數公式如下：
+    適應度函數的目的是最大化 Z。其中，ω\_i  是壓縮後隱藏層中的神經元數量，α\_i  是原始隱藏層中的神經元數量，ω\_i  /α\_i 就是壓縮率。 g 是給予第一目標的權重，1−g 是第二目標的權重。
+- ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/11.png)
+- 約束條件是：
+  - ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/12.png)
+
+
+-----
+
+# <a name="_axflki7so2gz"></a>IV. 實驗結果
+提出了一個新的中等規模火災分類基準，包括多類別的火災和非火災影像，用於評估DFAN的表現。
+
+與多個現有的火災檢測數據集進行了比較，顯示DFAN在多個衡量指標上超越了當前的先進方法。
+
+實驗驗證：作者在四個廣泛使用的火災檢測數據集上進行了廣泛的實驗，證實DFAN在精度、速度和偵測效能方面均優於多達21種現有的先進方法。
+## <a name="_3pbk3d4j0ool"></a>A.
+
+## <a name="_7w394xwptbuu"></a>B. 模型訓練
+- 模型建立：使用Keras API建立神經網路模型。模型架構如下：
+  - 輸入：
+    - inputs = Input((inp, inp, 3))：定義模型的輸入形狀。inp表示輸入影像尺寸（高度和寬度）的變量，3表示 RGB 顏色通道。
+  - 特徵提取：
+    - X = model(inputs)：假設model是預先訓練的模型或處理輸入模型的另一部分。
+  - Global Average Pooling:
+    - flat1 = GlobalAveragePooling2D()(X)：將全域平均池化應用於X。
+    - x3 = layers.GlobalAveragePooling2D()(X)： X 上的另一個全域平均池化運算。
+  - Dense Layers on Global Pooled Features:
+    - x1 = layers.Dense(100, activation='relu')(flat1)：具有 100 個單元和 ReLU 活化的密集層。
+    - x1 = layers.Dense(50, activation='relu')(x1)：另一個具有 50 個單元和 ReLU 活化的密集層。
+    - x1 = layers.BatchNormalization()(x1)：應用批量歸一化。
+  - 卷積分支:
+    - x2 = layers.Conv2D(filters=64, kernel\_size=(1,1), activation='relu', padding='same')(X)：具有 64 個濾波器和 ReLU 啟動的 1x1 卷積層。
+    - x2 = layers.Conv2D(filters=64, kernel\_size=(3,3), activation='relu', padding='same')(x2)：具有 64 個濾波器和 ReLU 啟動的 3x3 卷積層。
+    - x2 = layers.Conv2D(filters=64, kernel\_size=(1,1), activation='relu', padding='same')(x2)：另一個 1x1 卷積層，具有 64 個濾波器和 ReLU 啟動。
+    - x2 = layers.GlobalAveragePooling2D()(x2)：將全域平均池化應用於卷積輸出。
+    - x2 = layers.BatchNormalization()(x2)：應用批量歸一化。
+  - Concatenation and Batch Normalization:
+    - BAM = layers.concatenate([x1, x2])：連結密集分支和卷積分支的特徵。
+    - BAM = layers.BatchNormalization()(BAM)：將批次歸一化應用於連接的特性。
+    - BAM = layers.concatenate([x3, BAM])：將全域池化特徵 x3 與 BAM 連結。
+  - Final Dense Layers and Output:
+    - F = layers.Dense(150, activation='relu')(BAM)：具有 150 個單元和 ReLU 活化的密集層。
+    - F = layers.BatchNormalization()(F)：應用批量歸一化。
+    - output = Dense(12, activation='softmax')(F)：最終輸出層有 12 個單元和 softmax 激活，表示 12 個分類類別。
+  - 型號定義：
+    - model = Model(inputs=inputs, outputs=output)：定義具有指定輸入和輸出的模型。
+    - model.summary()：列印模型架構的摘要。
+- 模型編譯 / 訓練：
+  - 使用Adam優化器和交叉熵損失函數來編譯模型。
+  - 模型在訓練集上進行訓練，並在驗證集上進行評估。
+  - 訓練過程中記錄了損失和準確率。
+    - 批次大小 (batch\_size):24
+    - 訓練輪數 (epochs): 50，以確保模型充分學習數據特徵。
+    - 優化器 (optimizer): 隨機梯度下降法（SGD），學習率為0.001，動量為0.9，有助於加速收斂並防止陷入局部最小值。
+    - 損失函數 (loss): 稀疏分類交叉熵（sparse\_categorical\_crossentropy），這適合於多分類問題，並且目標標籤是整數格式。
+    - 評估指標 (metrics): 使用準確率（accuracy）來評估模型的性能。
+- 訓練歷史可視化：
+  - 訓練過程中的損失和準確率被可視化，以便於觀察模型的學習情況。
+  - ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/13.png) ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/14.png)
+- 模型評估:
+  - 測試集評估：
+    - Testing loss: 0.3253
+    - Testing accuracy: 0.9049
+    - ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/15.png) ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/16.png)
+##
+## <a name="_pb7md159cf4j"></a><a name="_9g1o9ew22npv"></a>C.
+
+# <a name="_5tf4eqj50rla"></a>V. 結論
+1. 引入了基於深度特徵和新引入的雙重火災注意力機制的 DFAN。所提出的模型還在四個基準數據集上進行了評估並與 SOTA 方法進行了比較；所提出的模型在其準確性、速度和大小之間提供了良好的折衷。
+1. 使用先進的模型壓縮技術來增強模型效率並減少模型大小。
+1. 創建了一個新的不平衡、多樣化且極具挑戰性的數據集來評估所提出的模型，並為火災場景分類提供了一個新的基準。
+
+本文的火災檢測方法可以應用在各種領域，包括森林、室內辦公室、道路、具有挑戰性的戶外場景、工業區等。並且可以在資源受限、具有挑戰性的監控環境中，以合理的模型大小執行火災檢測。
+
+未來，我們的目標是擴展目前的工作，提供有關火災增長速率和燃燒程度的詳細上下文訊息。此外，我們打算使用物體檢測或語義分割模型來精確標記圖像中的火災區域；這在 DFAN 中目前並未考慮。
+
+-----
 
 [^1]: 準確度（ACC）的定義是模型正確預測的樣本數量佔總樣本數量的比例。計算方法：Accuracy = (TP + TN) / (TP + TN + FP + FN)。其中 TP（True Positive）是真陽性，TN（True Negative）是真陰性，FP（False Positive）是偽陽性，FN（False Negative）是偽陰性。
 [^2]: 損失函數是用來評估模型預測結果與真實結果之間差距的一種指標。損失值越小，表示模型預測結果與真實結果越接近。
