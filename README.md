@@ -402,7 +402,8 @@ InceptionV3架構有三個 Inception module，分別採用不同的結構 (figur
 
 - 程式碼模型架構
 
-- ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/21.png)
+- ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/21.png) <img src="https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/22.png" width="300px">
+
 ## <a name="_5buoath577xv"></a>(5) 微分進化演算法（Differential Evolution）
 [差分進化演算法- 維基百科，自由的百科全書](https://zh.wikipedia.org/zh-tw/%E5%B7%AE%E5%88%86%E8%BF%9B%E5%8C%96%E7%AE%97%E6%B3%95)
 
