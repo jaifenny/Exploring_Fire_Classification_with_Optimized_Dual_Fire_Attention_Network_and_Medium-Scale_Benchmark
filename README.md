@@ -257,7 +257,7 @@ CNN 結合注意力機制在視訊資料上表現良好，但是在圖片資料�
   - 測試集評估：
     - Testing loss: 0.3253
     - Testing accuracy: 0.9049
-    - ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/15.png) ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/16.png)
+    - ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/15.png) <img src="https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/16.png" width="300px">
 ##
 ## <a name="_pb7md159cf4j"></a><a name="_9g1o9ew22npv"></a>C.
 
