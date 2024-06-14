@@ -194,9 +194,9 @@ CNN 結合注意力機制在視訊資料上表現良好，但是在圖片資料�
 - **選擇階段（Selection）：**
   在每次迭代中，根據適應度準則選擇更好的向量集。
   適應度函數（fitness function） Z 會同時考慮 F1 得分（F1-score）<sup>[^31]</sup>和壓縮率（compression ratio）。
-  - 適應度函數公式如下：
+- 適應度函數公式如下：
     適應度函數的目的是最大化 Z。其中，ω\_i  是壓縮後隱藏層中的神經元數量，α\_i  是原始隱藏層中的神經元數量，ω\_i  /α\_i 就是壓縮率。 g 是給予第一目標的權重，1−g 是第二目標的權重。
-- ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/11.png)
+  - ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/11.png)
 - 約束條件是：
   - ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/12.png)
 
