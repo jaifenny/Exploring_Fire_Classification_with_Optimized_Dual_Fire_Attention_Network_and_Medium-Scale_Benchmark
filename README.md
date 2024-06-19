@@ -4,9 +4,14 @@
 - IEEE Transactions on Image Processing, vol. 31, 2022
 - [doi: 10.1109/TIP.2022.3207006.](https://ieeexplore.ieee.org/document/9898909)
 # <a name="_h6fxtvq9o2v0"></a>I. 引言
-這部分討論了火災的危險性，如何快速蔓延並對環境造成嚴重破壞。
+基於視覺的火災偵測系統透過應用深度學習而有了顯著的改進，但是現有的模型仍有較高的錯誤警報數和較慢的推理速度，使得它們在真實情境下應用仍有不足之處。
 
-說明了過去幾年中用於火災檢測的技術，並指出了現有方法的不足，如偽報率高和推理速度慢。
+本文提出了一個新的深度學習模型：雙重火災注意力網路（Dual Fire Attention Network，DFAN）。第一個注意力機制突顯了現有骨幹模型特徵中最重要的通道，產生顯著強調的特徵地圖，第二個則是採用改進的空間注意力機制來捕捉空間細節並增強火災和非火災物體的辨別能力。
+最後使用元啟發方法去除大量額外參數，進一步針對實際應用將 DFAN 最佳化，這使得 FPS 值提高約 50%。
+最後，研究也貢獻了一個中等規模較多樣化的火災分類資料集，該資料集考慮了 12 種起火類別。
+
+本文對四個廣泛使用的火災偵測資料集進行了實驗，與 21 種 SOTA 方法相比，DFAN 提供了最佳結果。
+
 ### <a name="_citer6fy18dq"></a>**基於 Scalar 感測器的系統**
 目前廣泛使用的是火焰、顆粒、溫度和煙霧感測器來偵測火災。
 
@@ -209,7 +214,27 @@ CNN 結合注意力機制在視訊資料上表現良好，但是在圖片資料�
 與多個現有的火災檢測數據集進行了比較，顯示DFAN在多個衡量指標上超越了當前的先進方法。
 
 實驗驗證：作者在四個廣泛使用的火災檢測數據集上進行了廣泛的實驗，證實DFAN在精度、速度和偵測效能方面均優於多達21種現有的先進方法。
-## <a name="_3pbk3d4j0ool"></a>A.
+## <a name="_3pbk3d4j0ool"></a>A. Performance Evaluation of DFAN
+- 我們將討論並比較 DFAN 和 SOTA 方法在定量和定性分析方面的表現 :
+   -	量化分析：使用五個不同的基準資料集，以展示 DFAN 在火災場景分類和定位中的適用性，並比較 DFAN 和 SOTA 基於 CNN 方法的性能。
+
+     	a)	基於 TML 方法：使用 BoWFire、Foggia 和 FD 資料集來評估，所提出的模型將 ACC 從 93.55％ 提高到 99.60％。DFAN 實現了ACC、P 和 F1 的最高數值 (如表 I 所示)，這表明所提出的模型具有穩健性和適應性。
+
+     	b)	深度模型 : 在 BoWFire 資料集中，ANetFire 和 CNNFire 模型獲得較高的 R分數，然而在其他指標上 DFAN 取得最佳結果。而在 Yar 資料集中，我們的模型取得了最高的 P、R、F1 和 ACC值，顯示我們的模型比 LW-CNN、FDNet 和 ResNetFire 更穩健。
+
+     	➔	在火災偵測領域中
+
+    	●	Foggia 資料集 (最廣泛使用) : 傳統方法實現了最佳的 FN 比率，然而在 DFAN 中實現更高的 FP 和 ACC 值，優於 SOTA 方法。
+
+    	●	FD 資料集 (最具挑戰性) : 由於火災和非火災類別之間的視覺相似性，[2] 實現了最高的 R 值，然而 DFAN 在 P、F1 和 ACC 值表現上高於 SOTA 深度模型。整體定量分析表明，DFAN 模型在挑戰性火災場景分類方面具有最佳性能。
+
+    	  <img src="https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/22.png" width="300px">
+
+   -	質性分析 :
+如下圖 8 所示，DFAN 能夠在具有挑戰性的場景中偵測到火災區域。然而由於類別之間的視覺相似性，一些圖像被錯誤分類或未能正確定位。
+      <img src="https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/22.png" width="300px">
+
+
 
 ## <a name="_7w394xwptbuu"></a>B. 模型訓練
 - 模型建立：使用Keras API建立神經網路模型。模型架構如下：
@@ -258,8 +283,40 @@ CNN 結合注意力機制在視訊資料上表現良好，但是在圖片資料�
     - Testing loss: 0.3253
     - Testing accuracy: 0.9049
     - ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/15.png) <img src="https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/16.png" width="300px">
+    
 ##
-## <a name="_pb7md159cf4j"></a><a name="_9g1o9ew22npv"></a>C.
+## <a name="_pb7md159cf4j"></a><a name="_9g1o9ew22npv"></a>C.Model Compression and Complexity Analysis
+- 模型壓縮 :
+為了使模型能在資源受限的實際環境中部署，我們使用了一種元啟發式方法來壓縮 DFAN，並進行實驗來衡量準確率和壓縮比之間的權衡。
+- 壓縮權重值由 g 表示，設定為 0.25、0.5 和 0.75
+
+   ➔	更高的壓縮權重會損害準確率，即更多的壓縮會導致較低的準確率。
+-	如下表 II 和表 III 中呈現的壓縮結果所示 ( g = 0.5 ) :
+    - 模型大小從 83.63 MB 減少到 41.09 MB
+    -	參數量從 23,851,784 減少到 13,385,694
+    -	準確率從 88.00% 降至 86.50%
+
+ 	➔	模型大小減少了將近 50%，準確率下降了 -1.50%。
+    - ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/13.png) ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/14.png)
+  
+  - 原始模型和壓縮模型的熱圖如下圖 9 所示，顯示壓縮模型能夠像原始模型一樣準確地聚焦在火區域上。
+    ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/13.png)
+
+- 時間複雜度 :
+將提出的模型與不同 SOTA 方法 ( 包括 EFDNet、ResNet-Fire、EMNFire 和GNetFire ) 進行比較，涉及計算複雜度、模型大小和推理時間。
+  - 檢視每個模型的百萬浮點運算（MFLOPs）和大小（MB）:
+    - 如表 IV 所示，我們可以發現 GNetFire、EMNFire、ResNetFire 和FDNet 的 MFLOPs 量較多。 FDNet 和 EMNFire 的模型大小比DFAN 小。
+
+      ➔	我們的壓縮演算法將 DFAN 的大小和 MFLOPs 數量減少了高達50％，並略微降低了準確率。
+
+  -	測試 DFAN、DFANComp 和 SOTA 方法的推理時間 :
+    - 使用三種不同的硬體架構（CPU、GPU 和邊緣裝置－搭載 4GB 主記憶體的 Raspberry Pi 4（B+），其擁有一個四核心 Cortex-A72 64位元系統單晶片和一個 1.5 GHz 處理器）。
+    -	GNetFire 和 ResNetFire 的計算複雜度高、效能有限且 FPS值較低，使得這些模型在實際應用中難以使用。 
+    -	FDNet 和 EMNFire 的模型大小最小，但由於 MFLOPs 數量較多，它們的準確率值和推理速度低於 DFAN 和 DFANComp。
+
+  ➔	如下表 IV 所示，壓縮後的 GPU、CPU 和 Raspberry Pi 的 FPS 速率分別為 54.78、9.83 和 2.38，與原始 DFAN 相比，幾乎只有一半的 MFLOPs 和模型大小。因此，無論是 DFAN 還是壓縮的 DFAN，在精確性、模型大小、MFLOPs 和推理速度之間達成平衡，從而提高了此模型在邊緣設備上進行實時決策的潛力。
+
+  ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/13.png)
 
 # <a name="_5tf4eqj50rla"></a>V. 結論
 1. 引入了基於深度特徵和新引入的雙重火災注意力機制的 DFAN。所提出的模型還在四個基準數據集上進行了評估並與 SOTA 方法進行了比較；所提出的模型在其準確性、速度和大小之間提供了良好的折衷。
