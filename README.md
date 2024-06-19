@@ -228,11 +228,12 @@ CNN 結合注意力機制在視訊資料上表現良好，但是在圖片資料�
 
     	●	FD 資料集 (最具挑戰性) : 由於火災和非火災類別之間的視覺相似性，[2] 實現了最高的 R 值，然而 DFAN 在 P、F1 和 ACC 值表現上高於 SOTA 深度模型。整體定量分析表明，DFAN 模型在挑戰性火災場景分類方面具有最佳性能。
 
-    	  <img src="https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/22.png" width="300px">
+    	  <img src="https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/23.png" width="500px">
 
    -	質性分析 :
 如下圖 8 所示，DFAN 能夠在具有挑戰性的場景中偵測到火災區域。然而由於類別之間的視覺相似性，一些圖像被錯誤分類或未能正確定位。
-      <img src="https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/22.png" width="300px">
+
+    	<img src="https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/24.png" width="500px">
 
 
 
@@ -297,10 +298,10 @@ CNN 結合注意力機制在視訊資料上表現良好，但是在圖片資料�
     -	準確率從 88.00% 降至 86.50%
 
  	➔	模型大小減少了將近 50%，準確率下降了 -1.50%。
-    - ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/13.png) ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/14.png)
+    - ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/25.png) ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/26.png)
   
   - 原始模型和壓縮模型的熱圖如下圖 9 所示，顯示壓縮模型能夠像原始模型一樣準確地聚焦在火區域上。
-    ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/13.png)
+    ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/27.png)
 
 - 時間複雜度 :
 將提出的模型與不同 SOTA 方法 ( 包括 EFDNet、ResNet-Fire、EMNFire 和GNetFire ) 進行比較，涉及計算複雜度、模型大小和推理時間。
@@ -316,7 +317,7 @@ CNN 結合注意力機制在視訊資料上表現良好，但是在圖片資料�
 
   ➔	如下表 IV 所示，壓縮後的 GPU、CPU 和 Raspberry Pi 的 FPS 速率分別為 54.78、9.83 和 2.38，與原始 DFAN 相比，幾乎只有一半的 MFLOPs 和模型大小。因此，無論是 DFAN 還是壓縮的 DFAN，在精確性、模型大小、MFLOPs 和推理速度之間達成平衡，從而提高了此模型在邊緣設備上進行實時決策的潛力。
 
-  ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/13.png)
+  ![](https://github.com/jaifenny/Exploring_Fire_Classification_with_Optimized_Dual_Fire_Attention_Network_and_Medium-Scale_Benchmark/blob/main/picture/28.png)
 
 # <a name="_5tf4eqj50rla"></a>V. 結論
 1. 引入了基於深度特徵和新引入的雙重火災注意力機制的 DFAN。所提出的模型還在四個基準數據集上進行了評估並與 SOTA 方法進行了比較；所提出的模型在其準確性、速度和大小之間提供了良好的折衷。
